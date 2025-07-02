@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube動画監視ダッシュボード</title>
+      <meta name="robots" content="noindex, nofollow">
+    <style>
+        .size-controls {
+            text-align: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+        .size-btn {
+            padding: 5px 14px;
+            margin: 0 3px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .size-btn.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .video-grid {
+            display: grid;
+            gap: 8px;
+            padding: 8px;
+        }
+        .video-grid.small {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .video-grid.big {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .video-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 3px 3px 6px 3px;
+            background-color: #f9f9f9;
+            transition: transform 0.2s;
+        }
+        .video-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+        }
+        .video-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+        .video-title {
+            font-weight: bold;
+            font-size: 9px;
+            letter-spacing: 0.5px;
+        }
+        .video-iframe {
+            width: 100%;
+            /* Small: 225px, Big: 340px */
+            height: 225px;
+            border: none;
+            border-radius: 3px;
+            background-color: #000;
+            transition: height 0.2s;
+        }
+        .video-grid.big .video-iframe {
+            height: 340px;
+        }
+        .url-btn {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            padding: 2px 7px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 8px;
+        }
+        .url-btn:hover {
+            background-color: #3367D6;
+        }
+        .url-input {
+            width: 100%;
+            padding: 4px;
+            margin: 4px 0;
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            font-size: 10px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="size-controls">
+        <button class="size-btn active" id="small-btn">Small</button>
+        <button class="size-btn" id="big-btn">Big</button>
+    </div>
+    
+    <div class="video-grid small" id="video-grid">
+        <script>
+            for (let i = 1; i <= 15; i++) {
+                document.write(`
+                    <div class="video-item" id="video-${i}">
+                        <div class="video-header">
+                            <span class="video-title">動画${i}</span>
+                            <button class="url-btn" onclick="showUrlInput(${i})">URL設定</button>
+                        </div>
+                        <iframe class="video-iframe" src="about:blank"></iframe>
+                    </div>
+                `);
+            }
+        </script>
+    </div>
+
+    <script>
+        // サイズ切り替え
+        const smallBtn = document.getElementById('small-btn');
+        const bigBtn = document.getElementById('big-btn');
+        const videoGrid = document.getElementById('video-grid');
+        smallBtn.addEventListener('click', () => {
+            videoGrid.className = 'video-grid small';
+            smallBtn.classList.add('active');
+            bigBtn.classList.remove('active');
+            // iframeの高さも調整
+            document.querySelectorAll('.video-iframe').forEach(iframe => {
+                iframe.style.height = '225px';
+            });
+        });
+        bigBtn.addEventListener('click', () => {
+            videoGrid.className = 'video-grid big';
+            bigBtn.classList.add('active');
+            smallBtn.classList.remove('active');
+            // iframeの高さも調整
+            document.querySelectorAll('.video-iframe').forEach(iframe => {
+                iframe.style.height = '340px';
+            });
+        });
+
+        // URL入力フィールド表示
+        function showUrlInput(videoId) {
+            const container = document.getElementById(`video-${videoId}`);
+            const existingInput = container.querySelector('.url-input');
+            if (existingInput) existingInput.remove();
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'url-input';
+            input.placeholder = 'YouTube URLを入力';
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    setVideoUrl(videoId, input.value);
+                    input.remove();
+                }
+            };
+            container.insertBefore(input, container.querySelector('.video-iframe'));
+            input.focus();
+        }
+
+        // 動画URL設定
+        function setVideoUrl(videoId, url) {
+            const videoIdRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/;
+            const match = url.match(videoIdRegex);
+            if (match && match[1]) {
+                const iframe = document.querySelector(`#video-${videoId} .video-iframe`);
+                iframe.src = `https://www.youtube.com/embed/${match[1]}`;
+            } else {
+                alert('有効なYouTube URLを入力してください');
+            }
+        }
+    </script>
+</body>
+</html>
