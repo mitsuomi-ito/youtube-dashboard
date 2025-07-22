@@ -123,19 +123,11 @@
             videoGrid.className = 'video-grid small';
             smallBtn.classList.add('active');
             bigBtn.classList.remove('active');
-            // iframeの高さも調整
-            document.querySelectorAll('.video-iframe').forEach(iframe => {
-                iframe.style.height = '225px';
-            });
         });
         bigBtn.addEventListener('click', () => {
             videoGrid.className = 'video-grid big';
             bigBtn.classList.add('active');
             smallBtn.classList.remove('active');
-            // iframeの高さも調整
-            document.querySelectorAll('.video-iframe').forEach(iframe => {
-                iframe.style.height = '340px';
-            });
         });
 
         // URL入力フィールド表示
@@ -159,13 +151,18 @@
 
         // 動画URL設定
         function setVideoUrl(videoId, url) {
-            const videoIdRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/;
+            // ★★★ 修正箇所 ★★★
+            // /live/ 形式のURLにも対応するよう正規表現を修正
+            const videoIdRegex = /(?:youtube\.com\/(?:watch\?v=|live\/)|youtu\.be\/)([\w-]{11})/;
             const match = url.match(videoIdRegex);
+            
             if (match && match[1]) {
                 const iframe = document.querySelector(`#video-${videoId} .video-iframe`);
-                iframe.src = `https://www.youtube.com/embed/${match[1]}`;
+                // 動画IDの末尾にパラメータが付いている場合を考慮して、11文字で切り出す
+                const extractedId = match[1].substring(0, 11);
+                iframe.src = `https://www.youtube.com/embed/${extractedId}`;
             } else {
-                alert('有効なYouTube URLを入力してください');
+                alert('有効なYouTube URLを入力してください。\n例: https://www.youtube.com/watch?v=...\n例: https://youtube.com/live/...\n例: https://youtu.be/...');
             }
         }
     </script>
